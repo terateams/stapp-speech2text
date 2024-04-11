@@ -3,7 +3,7 @@ import streamlit as st
 from st_audiorec import st_audiorec
 from pydub import AudioSegment
 from .session import PageSessionState
-from .common import get_global_datadir
+from .common import check_apptoken_from_apikey, get_global_datadir
 from .common import audio_segment_split, generate_openai_transcribe
 from .common import openai_text_generate
 from .common import write_stream_text
@@ -19,17 +19,34 @@ st.set_page_config(page_title="语音创作", page_icon="✨")
 
 st.sidebar.title("🔊 语音创作 ✨")
 
+page_state = PageSessionState("speech2text")
+page_state.initn_attr("app_uid", None)
+
 def main():
     with st.sidebar:
         tab1, tab2 = st.tabs(["参数设置",  "关于"])
+        apikey_box = st.empty()
         with tab1:
+            if not page_state.app_uid:
+                apikey = st.query_params.get("apikey")
+                if not apikey:
+                    apikey = apikey_box.text_input("请输入 API Key", type="password")
+                    
+                if apikey:
+                    appuid = check_apptoken_from_apikey(apikey)
+                    if appuid:
+                        page_state.app_uid = appuid
+                        page_state.apikey = apikey
+                        apikey_box.empty()
+
+            if not page_state.app_uid:
+                st.error("Auth is invalid")
+                st.stop()
             param_box = st.container()
 
         with tab2:
             st.caption("基于语音的 AI 创作，让 AI 为你的创作提供灵感和帮助。")
-
-
-    page_state = PageSessionState("speech")
+            
 
     # 用于存储临时文件
     audio_tempdir = get_global_datadir("temp_audio")
@@ -56,7 +73,7 @@ def main():
 
     @st.cache_data(persist="disk")
     def get_speech(filename, language: str = "en"):
-        return generate_openai_transcribe(filename, language, format="text")
+        return generate_openai_transcribe(filename, language, format="text", apikey=page_state.apikey)
 
 
     def get_speech_text(audio_path):
@@ -131,7 +148,7 @@ def main():
             if output_type == "summary":
                 with st.spinner("正在创建摘要...."):
                     response = openai_text_generate(
-                        SUMMARY_PROMPT_STR, page_state.recode_text
+                        SUMMARY_PROMPT_STR, page_state.recode_text, apikey=page_state.apikey
                     )
                     placeholder = st.empty()
                     full_response = write_stream_text(placeholder, response)
@@ -143,7 +160,7 @@ def main():
             elif output_type == "blog":
                 with st.spinner("正在创建 Blog...."):
                     response = openai_text_generate(
-                        BLOG_PROMPT_STR, page_state.recode_text
+                        BLOG_PROMPT_STR, page_state.recode_text, apikey=page_state.apikey
                     )
                     placeholder = st.empty()
                     full_response = write_stream_text(placeholder, response)
@@ -156,7 +173,7 @@ def main():
                 if custom_prompt:
                     with st.spinner("正在创建自定义内容...."):
                         response = openai_text_generate(
-                            custom_prompt, page_state.recode_text
+                            custom_prompt, page_state.recode_text, apikey=page_state.apikey
                         )
                         placeholder = st.empty()
                         full_response = write_stream_text(placeholder, response)

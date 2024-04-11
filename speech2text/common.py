@@ -1,5 +1,6 @@
 import json
 import os
+import jwt
 from pydub import AudioSegment
 import requests
 
@@ -19,6 +20,20 @@ Clarification: If the desired length of the video content or summary is unclear,
 
 Personalization: GPT should present information in a simple, friendly way that ensures the summary is engaging and easy to understand.
 """
+
+def check_apptoken_from_apikey(apikey: str):
+    if not apikey:
+        return None
+    apisecret = os.environ.get('APP_SECRET')
+    if apikey:
+        try:
+            payload = jwt.decode(apikey, apisecret, algorithms=['HS256'])
+            uid = payload.get('uid')
+            if uid :
+                return uid
+        except Exception as e:
+            return None
+    return None
 
 def get_global_datadir(subpath: str = None):
     """
@@ -66,10 +81,10 @@ def audio_segment_split(audio_segment_src: AudioSegment, split_second: int):
     return split_list
 
 
-def openai_text_generate(sysmsg: str, prompt: str):
+def openai_text_generate(sysmsg: str, prompt: str, apikey: str):
     url = os.getenv("TEAMSGPT_APISITE", "https://api.teamsgpt.net") + "/api/generate"
     # Prepare headers and data
-    headers = {'Content-Type': 'application/json'}
+    headers = {'Content-Type': 'application/json', "Authorization": f"Bearer {apikey}"}
     data = json.dumps({
         "sysmsg": sysmsg,
         "prompt": prompt,
@@ -94,14 +109,14 @@ def openai_text_generate(sysmsg: str, prompt: str):
         else:
             raise Exception(f"Error: {response.status_code} {response.reason}")
 
-def generate_openai_transcribe(filename: str, language: str = "en", format: str = "text") -> str:
+def generate_openai_transcribe(filename: str, language: str = "en", format: str = "text", apikey: str= None) -> str:
     url = os.getenv("TEAMSGPT_APISITE", "https://api.teamsgpt.net") + "/api/speech2text"
-    print(url)
+    headers = {"Authorization": f"Bearer {apikey}"}
     with open(filename, 'rb') as f:
         files = {'file': (os.path.basename(filename), f)}
         data = {'language': language, 'format': format}
         
-        response = requests.post(url, files=files, data=data)
+        response = requests.post(url, files=files, data=data, headers=headers)
         
         if response.status_code == 200:
             json_response = response.json()
