@@ -4,3 +4,4 @@ srt
 pydub
 python-dotenv
 streamlit
+requests
