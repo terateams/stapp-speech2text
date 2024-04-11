@@ -45,6 +45,10 @@ def main():
             param_box = st.container()
 
         with tab2:
+            st.image(
+                os.path.join(os.path.dirname(__file__), "spech2text.png"),
+                use_column_width=True,
+            )
             st.caption("基于语音的 AI 创作，让 AI 为你的创作提供灵感和帮助。")
             
 
