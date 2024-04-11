@@ -1,0 +1,6 @@
+streamlit-audiorec
+pyjwt
+srt
+pydub
+python-dotenv
+streamlit
