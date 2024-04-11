@@ -79,9 +79,7 @@ def openai_text_generate(sysmsg: str, prompt: str):
     with requests.post(url, data=data, headers=headers, stream=True) as response:
         if response.status_code == 200:
             for line in response.iter_lines():
-                decoded_line = line.decode('utf-8')
-                print(decoded_line)
-                
+                decoded_line = line.decode('utf-8')               
                 if decoded_line.startswith('data:'):
                     try:
                         json_str = decoded_line[len('data: '):]
