@@ -15,15 +15,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-st.set_page_config(page_title="语音创作", page_icon="✨")
-
-st.sidebar.title("🔊 语音创作 ✨")
-
 page_state = PageSessionState("speech2text")
 page_state.initn_attr("app_uid", None)
 
 def main():
+    st.set_page_config(page_title="语音创作", page_icon="✨")
     with st.sidebar:
+        st.title("🔊 语音创作 ✨")
         tab1, tab2 = st.tabs(["参数设置",  "关于"])
         apikey_box = st.empty()
         with tab1:
