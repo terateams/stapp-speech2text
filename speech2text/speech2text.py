@@ -73,7 +73,7 @@ def main():
     )
 
 
-    @st.cache_data(persist="disk")
+    @st.cache_data()
     def get_speech(filename, language: str = "en"):
         return generate_openai_transcribe(filename, language, format="text", apikey=page_state.apikey)
 
