@@ -116,8 +116,10 @@ def main():
 
     if audio_path and st.button("识别语音", key="do_uploadfile"):
         with st.spinner("正在识别上传语音...."):
-            result = get_speech_text(audio_path)
-
+            try:
+                get_speech_text(audio_path)
+            except Exception as e:
+                st.warning(f"识别语音失败：{e}")
 
     st.divider()
 
