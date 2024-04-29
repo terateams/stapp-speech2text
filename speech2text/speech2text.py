@@ -105,39 +105,18 @@ def main():
     audio_path = None
 
 
-    tab1, tab2 = st.tabs(["录制语音", "上传音频"])
+    uploaded_file = st.file_uploader(
+        "上传音频文件", type=["wav", "mp3", "mp4", "ogg", "m4a"]
+    )
+    if uploaded_file:
+        audio_path = os.path.join(audio_tempdir, os.path.basename(uploaded_file.name))
+        with open(audio_path, "wb") as f:
+            f.write(uploaded_file.getvalue())
+        st.audio(audio_path)
 
-    with tab1:
-        wav_audio_recode = st_audiorec()
-        if st.button("识别语音", key="do_recode"):
-            if wav_audio_recode is not None:
-                status = st.status("正在识别录制语音....", state="running", expanded=True)
-                with status:
-                    status.update(label="正在保存语音....")
-                    _filename = md5(wav_audio_recode[:100]).hexdigest()
-                    # _filename = uuid.uuid4().hex
-                    audio_segment = AudioSegment.from_wav(io.BytesIO(wav_audio_recode))
-                    audio_path = os.path.join(audio_tempdir, f"{_filename}.audio.wav")
-                    audio_segment.export(audio_path, format="wav")
-                    status.update(label="已保存语音， 正在识别....")
-                    result = get_speech_text(audio_path)
-                    status.update(label="识别完成", state="complete")
-            else:
-                st.warning("没有录制到语音")
-
-    with tab2:
-        uploaded_file = st.file_uploader(
-            "上传音频文件", type=["wav", "mp3", "mp4", "ogg", "m4a"]
-        )
-        if uploaded_file:
-            audio_path = os.path.join(audio_tempdir, os.path.basename(uploaded_file.name))
-            with open(audio_path, "wb") as f:
-                f.write(uploaded_file.getvalue())
-            st.audio(audio_path)
-
-        if audio_path and st.button("识别语音", key="do_uploadfile"):
-            with st.spinner("正在识别上传语音...."):
-                result = get_speech_text(audio_path)
+    if audio_path and st.button("识别语音", key="do_uploadfile"):
+        with st.spinner("正在识别上传语音...."):
+            result = get_speech_text(audio_path)
 
 
     st.divider()
