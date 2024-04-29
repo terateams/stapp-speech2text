@@ -101,7 +101,6 @@ def main():
             "对输入的语音识别文本内容进行处理， 纠正错误，添加标点符号， 合理分段，使其更加通顺易读。", height=140,
         )
 
-    wav_audio_recode = None
     audio_path = None
 
 
