@@ -113,17 +113,19 @@ def main():
             f.write(uploaded_file.getvalue())
         st.audio(audio_path)
 
+    speechtext_box = st.empty()
     if audio_path and st.button("识别语音", key="do_uploadfile"):
         with st.spinner("正在识别上传语音...."):
             try:
-                get_speech_text(audio_path)
+                speech_text = get_speech_text(audio_path)
+                speechtext_box.code(speech_text)
             except Exception as e:
                 st.warning(f"识别语音失败：{e}")
 
     st.divider()
 
     if page_state.recode_text:
-        st.code(page_state.recode_text)
+        speechtext_box.code(page_state.recode_text)
         create_action = st.button("创建内容", type="primary",)
         placeholder = st.empty()
         if create_action:
