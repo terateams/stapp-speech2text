@@ -133,5 +133,5 @@ def write_stream_text(placeholder, response):
         if text is not None:
             full_response += text
             placeholder.markdown(full_response)
-        placeholder.markdown(full_response)
+    placeholder.markdown(full_response)
     return full_response
